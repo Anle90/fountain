@@ -1,0 +1,78 @@
+%h1.text-center Job Board I Hate Homework
+-if current_user
+  %h2 Current User
+  %p= "ID: #{current_user.id}"
+  %p= "Type: #{current_user.class}"
+  %p= "Email: #{current_user.email}"
+  %br
+
+- if user_signed_in?
+  - if current_user.class == Employer
+
+    %h2 Jobs With Applications
+    - @jobs.each do |j|
+      .row
+        .col-3
+          %p= "<strong>Name:</strong> #{j.title}".html_safe
+        .col-3
+          %p= "<strong>Title:</strong> #{j.description}".html_safe
+    %br
+
+    %h2 Create Jobs
+    = flash[:success]
+    = flash[:alert]
+    = form_for :job, url: user_jobs_path(current_user), method: :post do |f|
+      = f.label :title
+      %br
+      = f.text_field :title
+      %br
+      %br
+      = f.label :description
+      %br
+      = f.text_field :description
+      %br
+
+      = f.submit "Create job Post", class: "btn btn-primary"
+
+    = link_to "Sign Out", destroy_user_session_path, method: :delete
+
+  - else
+    %h2 Jobs Available
+    - @jobs.each do |j|
+      .row
+        .col-4
+          %p= "<strong>Employer Name:</strong> #{j.employer.name}".html_safe
+        .col-3
+          %p= "<strong>Company:</strong> #{j.title}".html_safe
+        .col-3
+          %p= "<strong>Title:</strong> #{j.description}".html_safe
+        .col-2
+          = link_to "Apply", user_applications_path(current_user, {job_id: j.id}), class: "btn btn-primary", method: :post
+
+    %h2 Jobs I Applied To
+    - @jobs_applied.each do |j|
+      .row
+        .col-3
+          %p= "<strong>Name:</strong> #{j.title}".html_safe
+
+    = link_to "Sign Out", destroy_user_session_path, method: :delete
+
+- else
+  %h2 Log in
+
+  = form_for :user, url: new_session_path(:user) do |f|
+    .field
+      = f.label :email
+      %br
+      = f.email_field :email, autofocus: true, autocomplete: "email"
+
+    .field
+      = f.label :password
+      %br
+      = f.password_field :password, autocomplete: "current-password"
+
+    .actions
+      = f.submit "Log in"
+
+  = render "devise/shared/links"
+
